@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Northstar Streaming Market Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="dashboard" data-testid="dashboard">
+    <header>
+      <div>
+        <p class="eyebrow">NORTHSTAR CAPITAL</p>
+        <h1>Market operations</h1>
+      </div>
+      <div class="sync-badge" data-testid="sync-badge" data-state-sync="unsynchronized" aria-live="polite">
+        <span class="status-dot"></span>
+        <span id="syncText">Synchronizing</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card chart-card" data-testid="chart-card">
+        <div class="card-head">
+          <div><p class="eyebrow">PORTFOLIO VALUE</p><h2 id="portfolioValue">$0.00</h2></div>
+          <span class="gain" id="gain">+0.00%</span>
+        </div>
+        <div id="loadingSkeleton" class="loading-skeleton" data-testid="loading-skeleton" aria-label="Loading market chart">
+          <div class="skeleton-line"></div><div class="skeleton-bars"></div>
+        </div>
+        <canvas id="marketChart" data-testid="market-chart" width="900" height="320" aria-label="Live market value chart"></canvas>
+        <div class="chart-footer">
+          <span id="chartPacketCount" data-testid="packet-count">Packets: 0</span>
+          <span id="chartFaultCount" data-testid="fault-count">Injected drops: 0</span>
+        </div>
+      </article>
+
+      <aside class="card action-card" data-testid="action-panel">
+        <p class="eyebrow">FIRST CHART ITEM</p>
+        <h2 id="firstItemSymbol" data-testid="first-item-symbol">AAPL</h2>
+        <p class="item-value" id="firstItemValue" data-testid="first-item-value">$0.00</p>
+        <button id="actionButton" data-testid="action-button" type="button">Execute review</button>
+        <p id="actionStatus" data-testid="action-status" aria-live="polite">Ready</p>
+        <div id="retryLog" data-testid="retry-log" class="retry-log"></div>
+      </aside>
+    </section>
+
+    <section class="card transactions" data-testid="transactions">
+      <div class="card-head">
+        <div><p class="eyebrow">TRANSACTION STREAM</p><h2>Recent activity</h2></div>
+        <button id="validateButton" data-testid="validate-button" type="button">Validate transaction</button>
+      </div>
+      <table>
+        <thead><tr><th>Time</th><th>Symbol</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody id="transactionRows" data-testid="transaction-rows"></tbody>
+      </table>
+      <p id="validationMessage" data-testid="validation-message" role="status"></p>
+    </section>
+  </main>
+  <div id="validationToast" class="toast" data-testid="validation-toast" role="alert"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

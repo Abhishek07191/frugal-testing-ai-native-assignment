@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shadow DOM Traversal Demonstration</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width:900px; margin:40px auto; padding:0 20px; }
+    .host { border:1px solid #94a3b8; border-radius:8px; padding:16px; margin:16px 0; }
+    pre { background:#0f172a; color:#dbeafe; padding:16px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <h1>Shadow DOM: open, nested, and closed roots</h1>
+  <section id="open-host" class="host" aria-label="Open shadow host"></section>
+  <section id="closed-host" class="host" aria-label="Closed shadow host"></section>
+  <pre id="result" aria-live="polite"></pre>
+  <script src="/shadow-demo.js"></script>
+</body>
+</html>

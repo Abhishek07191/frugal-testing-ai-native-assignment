@@ -1,0 +1,16 @@
+{
+  "name": "q1-ui-automation",
+  "private": true,
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

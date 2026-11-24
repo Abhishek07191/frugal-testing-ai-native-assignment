@@ -1,0 +1,11 @@
+{
+  "name": "q2-api-security",
+  "private": true,
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test tests/hmac-replay.spec.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
