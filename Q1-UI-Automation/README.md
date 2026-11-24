@@ -21,14 +21,15 @@ npm test
 npm run test:headed
 ```
 
-The suite runs four tests:
+The suite runs five tests:
 1. synchronization and valid chart rendering;
 2. every-fourth incoming packet dropped through Playwright routing, with 2–7 second server and route jitter;
 3. triple-click after measurable synchronization;
-4. malformed precision request capture and validation toast.
+4. malformed precision request capture and payload modification.
+5. race-safe triple-click, retry, and all circuit states.
 
 ## Expected Output
-Dashboard packets render as a live table/chart and the synchronization badge changes to `Synchronized`. Playwright prints fault packet and jitter lines for the network test and a final incoming/dropped summary. A passing run ends with `4 passed`.
+Dashboard packets render as a live table/chart and the synchronization badge changes to `Synchronized`. Playwright verifies packet and jitter observations and a final server/route drop summary. A passing run ends with `5 passed`.
 
 ## Network Simulation
 The server generates packets every 750 ms and schedules variable 2000–7000 ms jitter. It also marks every fourth server packet as an injected drop and exposes counters at `/api/faults`. The Playwright WebSocket route separately observes server-to-page traffic and drops every fourth incoming message. This is a deterministic local mock, not a real network or packet-loss implementation.

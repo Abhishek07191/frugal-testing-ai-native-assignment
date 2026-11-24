@@ -34,7 +34,9 @@ The server starts at `http://127.0.0.1:4180` by default.
 npm test
 ```
 
-The tests create a process with a test-only environment secret. They cover valid POST/PUT, invalid signature, modified payload, expired timestamp, and replay.
+The tests create a process with a test-only environment secret. They cover valid POST/PUT,
+invalid signature, modified payload, expired and future timestamps, entity-ID mismatch,
+malformed JSON, and replay.
 
 ## Expected Security Responses
 - `201` valid POST

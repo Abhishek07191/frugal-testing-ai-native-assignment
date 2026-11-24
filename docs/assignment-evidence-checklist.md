@@ -18,8 +18,9 @@
 - [x] Environment-variable secret example
 
 ## Automated Verification Complete
-- [x] Q1: 4/4 passed
-- [x] Q2: 5/5 passed
+- [x] Q1: 5/5 passed on 2026-11-24
+- [x] Q2: 8/8 passed on 2026-11-24
+- [x] Q3: 1/1 passed on 2026-11-24
 
 ## Manual Evidence Still Required
 The following remain outside the source repository and cannot be honestly generated as fake evidence:

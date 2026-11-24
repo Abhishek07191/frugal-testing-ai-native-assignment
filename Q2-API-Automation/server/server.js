@@ -39,10 +39,14 @@ app.put("/transactions/:id", (req, res) => {
   const entityId = req.params.id;
   const timestamp = req.headers["x-timestamp"];
   const signatureHeader = req.headers["x-signature-auth"];
+  const entityHeader = req.headers["x-entity-id"];
 
   if (!entities.has(entityId)) return res.status(404).json({ error: "ENTITY_NOT_FOUND" });
-  if (!timestamp || !signatureHeader) {
+  if (!timestamp || !signatureHeader || !entityHeader) {
     return res.status(400).json({ error: "AUTH_HEADERS_REQUIRED" });
+  }
+  if (entityHeader !== entityId) {
+    return res.status(400).json({ error: "ENTITY_ID_MISMATCH" });
   }
 
   const seconds = Number(timestamp);

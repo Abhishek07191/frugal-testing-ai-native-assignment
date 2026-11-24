@@ -96,7 +96,46 @@ test("expired timestamp is rejected", async () => {
   assert.equal((await response.json()).error, "EXPIRED_TIMESTAMP");
 });
 
-test("valid replay is rejected within 300 ms", async () => {
+test("future timestamp is rejected", async () => {
+  const { id } = await postTransaction();
+  const rawBody = JSON.stringify({ amount: 10, currency: "USD" });
+  const timestamp = Math.floor(Date.now() / 1000) + 301;
+  const signature = sign(timestamp, id, rawBody);
+  const response = await putTransaction(id, rawBody, timestamp, signature);
+  assert.equal(response.status, 401);
+  assert.equal((await response.json()).error, "EXPIRED_TIMESTAMP");
+});
+
+test("entity ID header must match the URL runtime ID", async () => {
+  const { id } = await postTransaction();
+  const rawBody = JSON.stringify({ amount: 10, currency: "USD" });
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = sign(timestamp, id, rawBody);
+  const response = await fetch(`${base}/transactions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Timestamp": String(timestamp),
+      "X-Signature-Auth": signature,
+      "X-Entity-ID": "different-id",
+    },
+    body: rawBody,
+  });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, "ENTITY_ID_MISMATCH");
+});
+
+test("malformed JSON is rejected after authentication", async () => {
+  const { id } = await postTransaction();
+  const rawBody = '{"amount":';
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = sign(timestamp, id, rawBody);
+  const response = await putTransaction(id, rawBody, timestamp, signature);
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, "INVALID_JSON");
+});
+
+test("valid replay is rejected", async () => {
   const { id } = await postTransaction();
   const rawBody = JSON.stringify({ amount: 99, currency: "USD" });
   const timestamp = Math.floor(Date.now() / 1000);

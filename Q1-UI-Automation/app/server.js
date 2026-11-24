@@ -14,13 +14,24 @@ app.get("/api/faults", (_req, res) => res.json(faultCounters));
 app.post("/api/transactions/validate", (req, res) => {
   const precision = req.body?.precision;
   const amount = req.body?.amount;
-  if (typeof precision !== "string" || !/^\d+\.\d+$/.test(precision) || typeof amount !== "number") {
+  if (typeof precision !== "string" || !/^(?:0|[1-9]\d*)\.(?:\d{1,2})$/.test(precision) ||
+      typeof amount !== "number" || !Number.isFinite(amount) || amount < 0) {
     return res.status(400).json({
       error: "VALIDATION_PRECISION_ERROR",
-      message: "Malformed transaction precision. Expected digits dot digits.",
+      message: "Malformed transaction precision or amount. Expected a non-negative amount and precision with 1-2 decimal places.",
     });
   }
   res.json({ valid: true, normalizedPrecision: Number(precision).toFixed(2) });
+});
+
+app.post("/api/reviews", async (req, res) => {
+  const failUntilAttempt = Math.max(1, Math.min(8, Number(req.body?.failUntilAttempt || 1)));
+  const attempt = Math.max(1, Number(req.body?.attempt || 1));
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  if (attempt < failUntilAttempt) {
+    return res.status(503).json({ error: "REVIEW_TRANSIENT_FAILURE", attempt });
+  }
+  res.json({ ok: true, attempt });
 });
 
 const server = http.createServer(app);

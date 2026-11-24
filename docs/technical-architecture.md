@@ -22,3 +22,14 @@ hex(HMAC-SHA256(secret, timestamp + "\n" + entityId + "\n" + rawBody))
 
 ## Q3
 Open roots are normally traversable with Playwright and shadow-aware browser APIs. Closed roots require a retained reference, instrumentation, or supported CDP/test seams.
+
+## Synchronization and security
+
+Q1 synchronization is derived from the WebSocket packet state, not fixed waiting. The retry
+operation uses real HTTP 503 responses and backoff. Its circuit-breaker state is recorded on
+the action panel and transitions through CLOSED, OPEN, and HALF-OPEN. Payload distortion is
+performed by Playwright request routing and remains tested both transformed and unmodified.
+
+Q2 preserves raw request text and includes timestamp and entity ID in its HMAC payload.
+Signature verification uses `crypto.timingSafeEqual`, timestamp freshness uses an absolute
+300-second window, and replay state is retained for accepted signed requests.

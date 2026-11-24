@@ -22,4 +22,8 @@ test("dashboard synchronizes and renders valid streamed chart data", async ({ pa
   await expect(page.getByTestId("loading-skeleton")).toBeHidden();
   await expect(page.getByTestId("market-chart")).toBeVisible();
   await expect(page.getByTestId("packet-count")).not.toHaveText("Packets: 0");
+  await page.screenshot({
+    path: "test-results/dashboard-synchronized.png",
+    fullPage: true,
+  });
 });

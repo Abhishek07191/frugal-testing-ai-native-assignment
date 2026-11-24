@@ -23,3 +23,10 @@ After `attachShadow({ mode: "closed" })`, `closedHost.shadowRoot` is `null`, and
 
 ## Semantic Prompt
 The reusable advanced prompt is in [semantic-locator-prompt.md](./semantic-locator-prompt.md).
+
+## Automated Verification
+```bash
+npm test
+```
+The Playwright test verifies open-root traversal and closed/nested closed ordinary-DOM
+limitations. A success screenshot is written to `test-results/q3-shadow-dom.png`.

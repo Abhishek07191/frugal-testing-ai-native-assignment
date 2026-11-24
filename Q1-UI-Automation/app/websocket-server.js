@@ -6,7 +6,7 @@ function attachWebSocketServer(server, counters) {
     const timer = setInterval(() => {
       counters.packetsSent += 1;
       const packetNumber = counters.packetsSent;
-      const jitter = 2000 + Math.floor(Math.random() * 5001);
+      const jitter = 2000 + Math.floor(Math.random() * 5001); // inclusive 2000-7000 ms
       const packet = {
         packetNumber,
         symbol: ["AAPL", "MSFT", "NVDA", "GOOG"][packetNumber % 4],
@@ -18,7 +18,6 @@ function attachWebSocketServer(server, counters) {
         if (socket.readyState !== socket.OPEN) return;
         if (packetNumber % 4 === 0) {
           counters.packetsDropped += 1;
-          socket.send(JSON.stringify({ ...packet, injectedDropMarker: true }));
           return;
         }
         counters.packetsDelivered += 1;

@@ -2,41 +2,46 @@
 
 Results below reflect commands executed in this repository on 2026-11-24.
 
-## Q1
-Command: `npm run test:q1`
+## Actual Automated Run
 
-Actual result:
-- 4 Playwright tests passed
-- 0 failed
-- Runtime: 19.8 seconds
-- Dashboard synchronization passed
-- Payload interception passed
-- Race/retry test passed
-- WebSocket route test passed
-- Network route observed 6 incoming packets and dropped 1 by packet 4
-- Jitter examples: 3171 ms, 4028 ms, 5655 ms, 5780 ms, 5825 ms
+Command: `npm test`
 
-Browser dependencies initially were missing (`libatk-1.0.so.0`) and were installed with `npx playwright install-deps chromium`. The rerun passed.
+Run date: 2026-11-24.
 
-## Q2
-Command: `npm run test:q2`
+### Q1 – UI automation
 
-Actual result:
-- 5 Node tests passed
-- 0 failed
-- Runtime: 428 ms
-- Valid POST/PUT passed
-- Invalid signature passed
-- Modified payload passed
-- Expired timestamp passed
-- Replay passed
+- Command: `npm run test:q1`
+- 5 tests passed; 0 failed
+- Runtime: 41.0 seconds for the final Q1 rerun; the full-suite rerun immediately before the
+  fault-counter UI update reported 39.0 seconds
+- Verified dashboard synchronization, server and route packet behavior,
+  2000–7000 ms jitter values, malformed-payload interception/modification,
+  graceful malformed-payload rejection, measured triple-click timing, retry behavior,
+  OPEN/HALF-OPEN/CLOSED circuit transitions.
 
-## Q3
-Served on `http://127.0.0.1:4175` and verified in headless Chromium. The browser confirmed that ordinary closed-root queries returned `null`, `closedHost.shadowRoot` was `null`, the open root exposed an accessible input, and the nested closed descendant was not ordinary-query traversable.
+### Q2 – API security
+
+- Command: `npm run test:q2`
+- 8 tests passed; 0 failed
+- Runtime: 454.598 ms
+- Verified POST/PUT, invalid signature, tampered payload, expired and future timestamps,
+  entity-ID mismatch, malformed JSON, and replay rejection.
+
+### Q3 – Shadow DOM
+
+- Command: `npm run test:q3`
+- 1 test passed; 0 failed
+- Runtime: 2.0 seconds
+- Verified open-root traversal and closed/nested closed ordinary-DOM limitation.
 
 ## Reports and Artifacts
-- Playwright HTML report: `Q1-UI-Automation/playwright-report/` when generated
-- Playwright traces/screenshots: `Q1-UI-Automation/test-results/` only for failed tests
+
+- Q1 HTML report: `Q1-UI-Automation/playwright-report/`
+- Q1 screenshots: `Q1-UI-Automation/test-results/` (generated only when tests run successfully
+  or when the failure policy applies)
+- Q1 failure traces: `Q1-UI-Automation/test-results/`
+- Q3 screenshots: `Q3-Shadow-DOM/test-results/`
 - API test output: terminal output
 
-These artifacts are generated and ignored by Git; no submission PDF or external Drive link was fabricated.
+Reports and screenshots are ignored by Git. This file contains no invented external links,
+video evidence, PDF, or submission result.

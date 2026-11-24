@@ -2,9 +2,10 @@
   "name": "frugal-testing-ai-native-assignment",
   "private": true,
   "scripts": {
-    "install:all": "npm install --prefix Q1-UI-Automation && npm install --prefix Q2-API-Automation",
+    "install:all": "npm install --prefix Q1-UI-Automation && npm install --prefix Q2-API-Automation && npm install --prefix Q3-Shadow-DOM",
     "test:q1": "npm test --prefix Q1-UI-Automation",
     "test:q2": "npm test --prefix Q2-API-Automation",
-    "test": "npm run test:q1 && npm run test:q2"
+    "test:q3": "npm test --prefix Q3-Shadow-DOM",
+    "test": "npm run test:q1 && npm run test:q2 && npm run test:q3"
   }
 }

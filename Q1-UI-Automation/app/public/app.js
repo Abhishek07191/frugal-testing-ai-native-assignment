@@ -4,7 +4,6 @@ const skeleton = document.querySelector("[data-testid=loading-skeleton]");
 const syncBadge = document.querySelector("[data-testid=sync-badge]");
 const rows = document.querySelector("[data-testid=transaction-rows]");
 let packetCount = 0;
-let faultCount = 0;
 let chartValues = [];
 
 function drawChart() {
@@ -47,20 +46,23 @@ function setSynchronized() {
 
 const socket = new WebSocket(`ws://${location.host}/stream`);
 socket.addEventListener("open", () => {
-  window.setTimeout(() => {
-    if (chartValues.length === 0) chartValues = [250, 252, 249, 255];
-    setSynchronized();
-  }, 900);
+  // Synchronization is state-driven. It completes on the first valid packet.
 });
+async function refreshFaultCounter() {
+  try {
+    const response = await fetch("/api/faults");
+    if (!response.ok) return;
+    const faults = await response.json();
+    document.querySelector("[data-testid=fault-count]").textContent =
+      `Injected drops: ${faults.packetsDropped}`;
+  } catch (_error) {
+    // Fault reporting is auxiliary and must not disrupt streaming.
+  }
+}
+window.setInterval(refreshFaultCounter, 750);
 socket.addEventListener("message", (event) => {
   const packet = JSON.parse(event.data);
   packetCount += 1;
-  if (packet.injectedDropMarker) {
-    faultCount += 1;
-    document.querySelector("[data-testid=fault-count]").textContent =
-      `Injected drops: ${faultCount}`;
-    return;
-  }
   chartValues.push(packet.value);
   document.querySelector("[data-testid=first-item-symbol]").textContent = packet.symbol;
   document.querySelector("#portfolioValue").textContent =
@@ -80,13 +82,31 @@ const actionButton = document.querySelector("[data-testid=action-button]");
 const actionStatus = document.querySelector("[data-testid=action-status]");
 const retryLog = document.querySelector("[data-testid=retry-log]");
 let circuitOpen = false;
+const actionPanel = document.querySelector('[data-testid="action-panel"]');
+let circuitState = "CLOSED";
+let operationInFlight = false;
+let circuitProbeTimer = null;
+
+function setCircuitState(state) {
+  circuitState = state;
+  actionPanel.dataset.circuitState = state;
+  actionStatus.textContent = state === "OPEN" ? "Circuit open" :
+    state === "HALF_OPEN" ? "Circuit half-open" : actionStatus.textContent;
+}
+
+setCircuitState("CLOSED");
 
 actionButton.addEventListener("click", async () => {
-  if (circuitOpen) {
+  if (circuitState === "OPEN") {
     logRetry("Circuit OPEN: operation blocked");
     actionStatus.textContent = "Circuit open";
     return;
   }
+  if (operationInFlight) {
+    logRetry("Race guard: operation already in progress");
+    return;
+  }
+  if (circuitState === "HALF_OPEN") actionButton.dataset.failUntilAttempt = "1";
   actionStatus.textContent = "Review started";
   await exponentialAction(0);
 });
@@ -98,20 +118,41 @@ function logRetry(message) {
 }
 
 async function exponentialAction(attempt) {
-  if (attempt >= 4) {
-    circuitOpen = true;
+  operationInFlight = true;
+  const failUntilAttempt = actionButton.dataset.failUntilAttempt
+    ? Number(actionButton.dataset.failUntilAttempt) : 2;
+  if (attempt >= 5) {
+    setCircuitState("OPEN");
     logRetry("Circuit state: OPEN");
     actionStatus.textContent = "Circuit breaker opened";
-    window.setTimeout(() => {
-      circuitOpen = false;
-      logRetry("Circuit state: CLOSED");
-    }, 5000);
+    circuitProbeTimer = window.setTimeout(() => {
+      setCircuitState("HALF_OPEN");
+      logRetry("Circuit state: HALF_OPEN");
+    }, 1500);
+    operationInFlight = false;
     return;
   }
-  const delay = 50 * (2 ** attempt);
-  await new Promise((resolve) => window.setTimeout(resolve, delay));
-  actionStatus.textContent = `Review attempt ${attempt + 1} complete`;
-  logRetry(`Retry state: attempt=${attempt + 1}, backoff=${delay}ms`);
+  const delay = 100 * (2 ** attempt);
+  if (attempt > 0) await new Promise((resolve) => window.setTimeout(resolve, delay));
+  try {
+    const response = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ failUntilAttempt, attempt: attempt + 1 }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "REVIEW_FAILED");
+    if (circuitState === "HALF_OPEN") {
+      setCircuitState("CLOSED");
+      logRetry("Circuit state: CLOSED");
+    }
+    operationInFlight = false;
+    actionStatus.textContent = `Review attempt ${attempt + 1} complete`;
+    logRetry(`Retry state: attempt=${attempt + 1}, backoff=${attempt === 0 ? 0 : delay}ms`);
+  } catch (error) {
+    logRetry(`Retry state: attempt=${attempt + 1}, backoff=${attempt === 0 ? 0 : delay}ms, error=${error.message}`);
+    await exponentialAction(attempt + 1);
+  }
 }
 
 document.querySelector("[data-testid=validate-button]").addEventListener("click", async () => {
